@@ -8,4 +8,12 @@
 {% endif %}
 
 {{posts.content|linebreaks}}
+
+{% for c in comment %}
+<h1>{{c.user.user.username}}</h1>
+<p>{{c.content}}</p>
+{% endfor %}
+
+<a href="{% url 'addcomment' posts.slug%}"> Добавить комментарий </a>
 {% endblock %}
+

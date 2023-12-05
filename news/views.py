@@ -6,7 +6,7 @@ from django.urls import reverse_lazy
 from django.views.generic import CreateView
 from .utils import *
 
-from .forms import AddPostForm, RegisterUserForm, LoginUserForm
+from .forms import AddPostForm, RegisterUserForm, LoginUserForm, AddComment
 from .models import News, Category
 menu = [{'title': "О сайте", 'url_name': 'about'},
         {'title': "Добавить статью", 'url_name': 'add_page'},
@@ -30,7 +30,15 @@ def index(request):
 #     return render(request, 'news/base.html', context= data)
 
 def my_articles(request):
-    return HttpResponse('Мои статьи')
+    prof = Profiles.objects.get(user=request.user.id)
+    posts = News.objects.filter(profiles=prof.id)
+
+    data = {
+        'title': f'Мои новости',
+        'menu': menu,
+        'posts': posts,
+    }
+    return render(request, 'news/index.html', context=data)
 
 def about(request):
    return HttpResponse('о сайте')
@@ -76,30 +84,37 @@ def addpage(request):
 
     return render(request, 'news/addpage.html', {'form': form, 'menu': menu, 'title': 'Добавление статьи'})
 
-def addpage_save(request):
-    us_id = request.user.id
-    sl = request.POST.get("slug")
-    nws = News.objects.get(slug=sl)
-    nws.objects.update(profiles_id=us_id)
-    nws.save()
-
-    posts = News.objects.filter(is_published=True)
+def addcomment(request, post_slug):
+    if request.method == 'POST':
+        form = AddComment(request.POST)
+        if form.is_valid():
+            form.save()
+            new = News.objects.get(slug=post_slug)
+            prof = Profiles.objects.get(user=request.user.id)
+            com = Comment.objects.get(news__slug=post_slug)
+            com.update(news=new.id)
+            com.update(user=prof.id)
+            return redirect('home')
+    else:
+        form = AddComment
     data = {
         'title': 'Главная страница',
         'menu': menu,
-        'posts': posts,
-        'cat_selected': 0
+        'cat_selected': 0,
+        'form': form,
     }
-    return render(request, 'news/index.html', context=data)
+    return render(request, 'news/addcomment.html', context=data)
 
 
 def post(request, post_slug):
     posts = News.objects.get(slug=post_slug)
+    comment = Comment.objects.filter(news__id=posts.id)
 
     data = {
         'title': f'Пост {post_slug}',
         'menu': menu,
         'posts': posts,
+        'comment': comment,
     }
     return render(request, 'news/post.html', context=data)
 

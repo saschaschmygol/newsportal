@@ -50,7 +50,20 @@ class Profiles(models.Model):
     photo = models.ImageField(upload_to="profiles/%Y/%m/%d/", default=None, blank=True, null=True, verbose_name="Фото")
 
     def __str__(self):
-        return f"User {self.user}"
+        return f"{self.user}"
     class Meta:
         verbose_name = 'Профиль'
         verbose_name_plural = 'Профили'
+
+
+class Comment(models.Model):
+    user = models.ForeignKey("Profiles", on_delete=models.PROTECT, null=True, verbose_name="Профиль")
+    news = models.ForeignKey("News", on_delete=models.PROTECT, null=True, verbose_name="Новость")
+    time_create = models.DateTimeField(auto_now_add=True, verbose_name="Время создания")
+    content = models.TextField(blank=True, verbose_name="Контент")
+
+    def __str__(self):
+        return f" Комментарий {self.user} к новости {self.news} || {self.pk}"
+    class Meta:
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
