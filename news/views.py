@@ -172,44 +172,84 @@ def follow_the_news(request):
     q1 = ['kylt', 'nauka', 'ekonom', 'sport']
     q2 = ['culture', 'everything', 'economy', 'sport']
     newsapi = NewsApiClient(api_key='ecdc4ef094694a738d238068eb2fcc4b')
+    totalResult = 0
 
     for x, y in zip(q1, q2):
         categor = Category.objects.get(slug=x)
         print(categor)
-        maxResult = 100
-        page = 0
-        totalResult = 0
-        while (maxResult * page <= totalResult):
-            try:
-                print(x)
-                print(y)
-                page += 1
-                all_articles = newsapi.get_everything(q=str(y),
-                                                      from_param='2023-12-14',
-                                                      to='2023-12-18',
-                                                      language='en',
-                                                      page=page)
-                if all_articles["status"] != "ok":
-                    break
-
-                articles = all_articles['articles']
-                totalResult = all_articles["totalResults"]
-
-                for i in articles:
-                    print(i['title'])
-                    title = i['title']
-                    content = i['content']
-                    #profile = Profiles.objects.get(user=1)
-                    new = News(title=title, content=content, cat=categor)
-                    slug = str(new.id) + '-news'
-                    # new['slug'] = slug
-                    new.save()
-                    print(new)
-
-            except Exception:
+        try:
+            all_articles = newsapi.get_everything(q=str(y),
+                                                          from_param='2023-12-14',
+                                                          to='2023-12-18',
+                                                          language='en',
+                                                          page=1)
+            articles = all_articles['articles']
+            totalResult = all_articles["totalResults"]
+            if all_articles["status"] != "ok":
                 break
 
+            for i in articles:
+                print(i['title'])
+                title = i['title']
+                content = i['content']
+                #profile = Profiles.objects.get(user=1)
+                new = News(title=title, content=content, cat=categor)
+                new.save()
+                # slug = str(new['pk']) + '-news'
+                # # # new['slug'] = slug
+
+                # print(new)
+
+
+
+        except Exception:
+            break
+
+        # maxResult = 100
+        # page = 0
+        # totalResult = 0
+        # while (maxResult * page <= totalResult):
+        #     try:
+        #         print(x)
+        #         print(y)
+        #         page += 1
+        #         all_articles = newsapi.get_everything(q=str(y),
+        #                                               from_param='2023-12-14',
+        #                                               to='2023-12-18',
+        #                                               language='en',
+        #                                               page=page)
+        #         if all_articles["status"] != "ok":
+        #             break
+        #
+        #         articles = all_articles['articles']
+        #         totalResult = all_articles["totalResults"]
+        #
+        #         for i in articles:
+        #             print(i['title'])
+        #             title = i['title']
+        #             content = i['content']
+        #             #profile = Profiles.objects.get(user=1)
+        #             new = News(title=title, content=content, cat=categor)
+        #             slug = str(new.id) + '-news'
+        #             # new['slug'] = slug
+        #             new.save()
+        #             print(new)
+        #
+        #     except Exception:
+        #         break
+    nnew = News.objects.all()
+    for i in nnew:
+        sslug = str(i.id) + '-news'
+        prof = Profiles.objects.get(user=request.user)
+        News.objects.filter(id=i.id).update(slug=sslug, profiles=prof)
+        # print(i.id)
+        # i.slug = str(i.id) + '-news'
+        # i.save()
+        # i.update(slug=str(i.id))
+        # i['slug'] = str(i.id)+'News'
+        # # i.update(slug=(str(i.id)+'News'))
     return redirect('home')
+
 
 
 

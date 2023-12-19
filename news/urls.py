@@ -13,5 +13,7 @@ urlpatterns = [
     path('reviews/<int:post_id>', views.reviews, name="reviews"),
     path('cat/<slug:cat_slug>', views.cat, name="cat"),
     path('register/', views.RegisterUser.as_view(), name="register"),
+    path('proflogin/', views.proflogin, name="proflogin"),
     path('addcomment/<slug:post_slug>', views.addcomment, name="addcomment"),
+    path('follow_the_news/', views.follow_the_news, name="follow_the_news"),
 ]
